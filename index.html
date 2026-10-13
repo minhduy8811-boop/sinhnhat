@@ -112,7 +112,7 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--acc2);outline-o
  </section>
 
  <section class="panel">
-  <h2>Thêm người thân</h2>
+  <h2>Thêm người thân (lưu trên máy bạn)</h2>
   <form id="f">
    <div><label for="n">Tên</label><input id="n" type="text" maxlength="30" placeholder="Ví dụ: Mẹ, Bé Bông…" required></div>
    <div><label for="d">Ngày tháng năm sinh</label><input id="d" type="date" required></div>
@@ -147,6 +147,14 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--acc2);outline-o
 
 <script>
 (function(){
+/* ====== DANH SÁCH CẢ NHÀ: sửa tên và ngày sinh ở đây (định dạng năm-tháng-ngày) ====== */
+var FAMILY=[
+ {n:'Huỳnh Nguyễn Nguyên Tâm',dob:'1978-10-14',e:'👩'},
+ {n:'Hứa Minh Duy',dob:'2007-11-16',e:'👨'},
+ {n:'Hứa Châu',dob:'1978-12-20',e:'👨'},
+ {n:'Hứa Nguyên Thảo',dob:'2001-09-26',e:'👧'}
+];
+/* ================================================================================== */
 var KEY='fam-bday-v1',EM=['👨','👩','👦','👧','👴','👵','👶','🐶'],em=EM[0],people=[],shown={};
 var $=function(i){return document.getElementById(i)};
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -156,6 +164,7 @@ function load(){
  try{var m=(location.hash||'').match(/d=([^&]+)/);if(m){var a=dec(decodeURIComponent(m[1]));if(Array.isArray(a)){people=a;save();return}}}catch(e){}
  try{var s=localStorage.getItem(KEY);if(s)people=JSON.parse(s)||[]}catch(e){}
 }
+function all(){return FAMILY.concat(people.filter(function(p){return !FAMILY.some(function(f){return f.n===p.n&&f.dob===p.dob})}))}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(people))}catch(e){}}
 function t0(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())}
 function mk(y,m,d){var x=new Date(y,m-1,d);if(m==2&&d==29&&x.getMonth()!=1)x=new Date(y,1,28);return x}
@@ -169,14 +178,14 @@ function toast(s){var t=$('toast');t.textContent=s;t.classList.add('on');setTime
 var wishes=['Chúc bạn tuổi mới thật nhiều sức khỏe, niềm vui và những điều bất ngờ dễ thương!','Mong mỗi ngày của bạn đều ngọt như chiếc bánh hôm nay. Yêu thương cả nhà gửi đến bạn!','Tuổi mới bình an, hạnh phúc, mọi điều mong ước đều thành hiện thực nhé!'];
 function render(){
  var L=$('list');
- if(!people.length){L.innerHTML='<div class="empty">Chưa có ai. Hãy thêm người đầu tiên ở phía trên nhé.</div>';$('next').innerHTML='<span>Thêm một người để bắt đầu đếm ngược</span>';return}
- var arr=people.map(function(p,i){var f=info(p);return{p:p,i:i,f:f}}).sort(function(a,b){return a.f.days-b.f.days});
+ if(!all().length){L.innerHTML='<div class="empty">Chưa có ai. Hãy thêm người đầu tiên ở phía trên nhé.</div>';$('next').innerHTML='<span>Thêm một người để bắt đầu đếm ngược</span>';return}
+ var arr=all().map(function(p,i){var f=info(p);return{p:p,i:i,f:f}}).sort(function(a,b){return a.f.days-b.f.days});
  L.innerHTML=arr.map(function(o){
   var f=o.f,td=f.days===0;
   return '<article class="card'+(td?' today':'')+'"><div class="e">'+esc(o.p.e)+'</div><h3>'+esc(o.p.n)+'</h3><small>Sinh ngày '+fmt(f)+'</small>'
   +'<div class="days">'+(td?'Hôm nay! 🎉':'Còn '+f.days+' ngày')+'</div><small>Sắp tròn '+f.age+' tuổi</small>'
   +'<div class="bar"><i style="width:'+Math.round((365-Math.min(f.days,365))/365*100)+'%"></i></div>'
-  +'<div class="row"><button class="btn" data-w="'+o.i+'">Chúc mừng</button><button class="btn ghost" data-x="'+o.i+'" aria-label="Xóa '+esc(o.p.n)+'">Xóa</button></div></article>';
+  +'<div class="row"><button class="btn" data-w="'+o.i+'">Chúc mừng</button>'+(o.i>=FAMILY.length?'<button class="btn ghost" data-x="'+o.i+'" aria-label="Xóa '+esc(o.p.n)+'">Xóa</button>':'')+'</div></article>';
  }).join('');
  var n=arr[0];
  $('next').innerHTML=n.f.days===0?'<b>🎂</b><span>Hôm nay là sinh nhật của <strong>'+esc(n.p.n)+'</strong>!</span>':'<b>'+n.f.days+'</b><span>ngày nữa là sinh nhật<br><strong>'+esc(n.p.n)+'</strong></span>';
@@ -223,23 +232,21 @@ $('f').onsubmit=function(ev){
 };
 $('list').onclick=function(ev){
  var w=ev.target.closest('[data-w]'),x=ev.target.closest('[data-x]');
- if(w)celebrate(people[+w.dataset.w]);
- if(x){var i=+x.dataset.x;if(confirm('Xóa '+people[i].n+' khỏi danh sách?')){people.splice(i,1);save();render()}}
+ if(w)celebrate(all()[+w.dataset.w]);
+ if(x){var q=all()[+x.dataset.x];var i=people.indexOf(q);if(i>=0&&confirm('Xóa '+q.n+' khỏi danh sách?')){people.splice(i,1);save();render()}}
 };
-function link(){return location.href.split('#')[0]+'#d='+encodeURIComponent(enc(people))}
+function link(){var b=location.href.split('#')[0];return people.length?b+'#d='+encodeURIComponent(enc(people)):b}
 function showLink(){var b=$('lb');b.style.display='block';b.value=link();b.select()}
 $('copy').onclick=function(){
- if(!people.length)return toast('Hãy thêm người trước đã');
  var l=link();try{navigator.clipboard.writeText(l).then(function(){toast('Đã sao chép liên kết')},showLink)}catch(e){showLink()}showLink();
 };
 $('share').onclick=function(){
- if(!people.length)return toast('Hãy thêm người trước đã');
  if(navigator.share){navigator.share({title:'Sinh nhật gia đình',text:'Lịch sinh nhật cả nhà mình 🎂',url:link()}).catch(showLink)}else showLink();
 };
 /* balloons */
 (function(){var c=['#ff6fae','#ffc857','#9a7bff','#5ee0c0'],h='';for(var i=0;i<9;i++)h+='<i class="bl" style="left:'+(i*11+Math.random()*6)+'%;background:'+c[i%4]+';animation-duration:'+(16+Math.random()*14)+'s;animation-delay:'+(-Math.random()*20)+'s"></i>';$('bls').innerHTML=h})();
 load();render();
-var tdp=people.filter(function(p){return info(p).days===0});
+var tdp=all().filter(function(p){return info(p).days===0});
 if(tdp.length)setTimeout(function(){celebrate(tdp[0])},900);
 })();
 </script>
