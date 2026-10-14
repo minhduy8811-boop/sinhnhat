@@ -152,10 +152,11 @@ var FAMILY=[
  {n:'Huỳnh Nguyễn Nguyên Tâm',dob:'1978-10-14',e:'👩'},
  {n:'Hứa Minh Duy',dob:'2007-11-16',e:'👨'},
  {n:'Hứa Châu',dob:'1978-12-20',e:'👨'},
- {n:'Hứa Nguyên Thảo',dob:'2001-09-26',e:'👧'}
+ {n:'Hứa Nguyên Thảo',dob:'2001-09-26',e:'👧'},
+ {n:'Đỗ Thị Mèo',dob:'1935-10-10',e:'👵'}
 ];
 /* ================================================================================== */
-var KEY='fam-bday-v1',EM=['👨','👩','👦','👧','👴','👵','👶','🐶'],em=EM[0],people=[],shown={};
+var KEY='fam-bday-hua-v1',EM=['👨','👩','👦','👧','👴','👵','👶','🐶'],em=EM[0],people=[],shown={};
 var $=function(i){return document.getElementById(i)};
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
@@ -175,7 +176,12 @@ function info(p){
 }
 function fmt(i){return ('0'+i.d).slice(-2)+'/'+('0'+i.m).slice(-2)+'/'+i.y}
 function toast(s){var t=$('toast');t.textContent=s;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)}
-var wishes=['Con chúc mẹ/ba/hai tuổi mới thật nhiều sức khỏe, niềm vui và những điều bất ngờ trong cuộc sống nhé!,bình an,hạnh phúc,mong mọi điều ước đều sẽ trở thành hiện thực'];
+var wishes=[
+ 'Chúc bạn tuổi mới thật nhiều sức khỏe, bình an và luôn được bao quanh bởi những người thương yêu nhé!',
+ 'Chúc một năm mới tràn đầy niềm vui, mọi điều ước đều thành hiện thực và nụ cười luôn nở trên môi!',
+ 'Cả nhà luôn yêu thương và mong bạn mỗi ngày đều hạnh phúc, khỏe mạnh và thật nhiều may mắn!',
+ 'Sinh nhật vui vẻ nhé! Chúc tuổi mới có thêm nhiều bình yên, nhiều tiếng cười và những điều bất ngờ thật đẹp!'
+];
 function render(){
  var L=$('list');
  if(!all().length){L.innerHTML='<div class="empty">Chưa có ai. Hãy thêm người đầu tiên ở phía trên nhé.</div>';$('next').innerHTML='<span>Thêm một người để bắt đầu đếm ngược</span>';return}
